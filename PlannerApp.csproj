@@ -5,16 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Bson" Version="2.10.2" />
     <PackageReference Include="OpenWeatherMap.Standard" Version="1.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <PackageReference Include="AspNetCore.Identity.Mongo" Version="6.7.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,4 +20,13 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\ViewModels\" />
+    <Folder Include="Data\Models\" />
+    <Folder Include="Data\DbContexts\" />
+    <Folder Include="Data\Services\" />
+    <Folder Include="Pages\Account\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Controllers\User\" />
+  </ItemGroup>
 </Project>

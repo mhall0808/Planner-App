@@ -1,0 +1,28 @@
+﻿@page "/account/register"
+@using PlannerApp.Data.ViewModels;
+
+<form>
+    <div class="form-group">
+        <label for="username">UserName</label>
+        <input type="text" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter Username" @bind="registerViewModel.UserName">
+        <small id="usernameHelp" class="form-text text-muted">We need this for you to login.</small>
+    </div>
+    <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" @bind="registerViewModel.Email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Password" @bind="registerViewModel.Password">
+    </div>
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" @bind="registerViewModel.ConfirmPassword">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@code {
+    RegisterViewModel registerViewModel = new RegisterViewModel();
+}

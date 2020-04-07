@@ -1,13 +1,21 @@
+using Microsoft.Extensions.Options;
 using OpenWeatherMap.Standard;
 using OpenWeatherMap.Standard.Models;
+using PlannerApp.Data.Models;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlannerApp.Data
+namespace PlannerApp.Data.Services
 {
     public class WeatherForecastService
     {
+        private readonly AppSettings _appSettings;
+
+        public WeatherForecastService(IOptions<AppSettings> appSettings)
+        {
+            _appSettings = appSettings.Value;
+        }
+
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -15,7 +23,8 @@ namespace PlannerApp.Data
 
         public Task<WeatherForecast> GetForecastAsync(DateTime startDate)
         {
-            string key = Properties.Resources.OpenWeatherApiKey;
+            string key = _appSettings.OpenWeatherMapApiKey;
+
             Current current = new Current(key);
             WeatherData data = null;
             Task getWeather = Task.Run(async () => { data = await current.GetWeatherDataByZipAsync("83401", "us"); }); // TODO - have a user input instead - loaded to the DB
@@ -54,7 +63,7 @@ namespace PlannerApp.Data
                 summaryData = "It's pretty dang hot outside.  Why go out when you can stay in and use your AC?";
             }
 
-                return Task.FromResult(summaryData);
+            return Task.FromResult(summaryData);
         }
 
     }

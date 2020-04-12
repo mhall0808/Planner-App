@@ -23,5 +23,11 @@ namespace PlannerApp.Data.ViewModels
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        public bool IsValid
+        {
+            get => true;
+            private set { }
+        }
     }
 }

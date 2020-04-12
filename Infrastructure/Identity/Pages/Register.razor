@@ -1,0 +1,76 @@
+﻿@page "/identity/register"
+@using PlannerApp.Data.ViewModels;
+@using PlannerApp.Infrastructure.Identity.Models;
+@inject PlannerApp.Infrastructure.Identity.Service.IAccountService AccountService
+
+<div class="container">
+    <div class="container">
+        <div class="row justify-content-around">
+            <div>
+                <h4 class="text-center">Register</h4>
+            </div>
+        </div>
+    </div>
+
+    <form class="">
+        <div class="form-group">
+            <label for="username">UserName</label>
+            <input type="text" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter Username" @bind="registerViewModel.UserName">
+            <small id="usernameHelp" class="form-text text-muted">We need this for you to login.</small>
+        </div>
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" @bind="registerViewModel.Email">
+            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Password" @bind="registerViewModel.Password">
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" @bind="registerViewModel.ConfirmPassword">
+        </div>
+
+        @if (formInProgress)
+        {
+            <div class="form-group justify-content-center">
+                <button type="button" class="btn btn-primary" @onclick="@(() => RegisterUser())" disabled>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Register
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="form-group justify-content-center">
+                <button type="button" class="btn btn-primary" @onclick="@(() => RegisterUser())">
+                    Register
+                </button>
+            </div>
+        }
+
+    </form>
+</div>
+
+
+@code {
+    RegisterViewModel registerViewModel = new RegisterViewModel();
+    bool formInProgress = false;
+
+    protected async Task RegisterUser()
+    {
+        UdateFormState(true);
+
+        AppUser appUser = await AccountService.Register(registerViewModel);
+
+        UdateFormState(false);
+
+    }
+
+    private void UdateFormState(bool isDisabled)
+    {
+        formInProgress = isDisabled;
+        this.StateHasChanged();
+    }
+}

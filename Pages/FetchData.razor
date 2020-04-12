@@ -3,42 +3,51 @@
 @using PlannerApp.Data.Models
 @using PlannerApp.Data.Services
 @inject WeatherForecastService ForecastService
+@inject NavigationManager NavigationManager
 
-<h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<AuthorizeView>
+    <Authorized>
+        <h1>Weather forecast</h1>
 
-@if (forecast == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
-        </tbody>
-    </table>
-}
+        <p>This component demonstrates fetching data from a service.</p>
 
-@code {
-    private WeatherForecast forecast;
+        @if (forecast == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Temp. (C)</th>
+                        <th>Temp. (F)</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@forecast.Date.ToShortDateString()</td>
+                        <td>@forecast.TemperatureC</td>
+                        <td>@forecast.TemperatureF</td>
+                        <td>@forecast.Summary</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecast = await ForecastService.GetForecastAsync(DateTime.Now);
-    }
-}
+        @code {
+            private WeatherForecast forecast;
+
+            protected override async Task OnInitializedAsync()
+            {
+                forecast = await ForecastService.GetForecastAsync(DateTime.Now);
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <Login />
+    </NotAuthorized>
+</AuthorizeView>

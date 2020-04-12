@@ -1,27 +1,26 @@
-using System.Text;
-using System.Threading.Tasks;
+using AspNetCore.Identity.Mongo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using PlannerApp.Data.DbContexts;
 using PlannerApp.Data.Models;
 using PlannerApp.Data.Services;
+using PlannerApp.Infrastructure.Identity.Models;
+using PlannerApp.Infrastructure.Identity.Policy;
+using PlannerApp.Infrastructure.Identity.Service;
+using System.Text;
 
 namespace PlannerApp
 {
     public class Startup
     {
-        private readonly byte[] _secret;
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _secret = Encoding.ASCII.GetBytes(configuration.GetValue<string>("JwtSecret"));
         }
 
         public IConfiguration Configuration { get; }
@@ -31,23 +30,35 @@ namespace PlannerApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration);
-            services.Configure<AppSettings>((AppSettings obj) => obj.ConnectionString = Configuration.GetConnectionString("MongoDb"));
+            services.Configure((AppSettings obj) => obj.ConnectionString = Configuration.GetConnectionString("MongoDb"));
+
+            services.AddIdentityMongoDbProvider<AppUser>(identity =>
+            {
+                identity.Password.RequireDigit = false;
+                identity.Password.RequireLowercase = false;
+                identity.Password.RequireNonAlphanumeric = false;
+                identity.Password.RequireUppercase = false;
+                identity.Password.RequiredLength = 1;
+                identity.Password.RequiredUniqueChars = 0;
+            },
+                mongo =>
+                {
+                    mongo.ConnectionString = Configuration.GetConnectionString("MongoDb");
+                }
+            );
 
             services.AddLogging();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddControllers();
 
-            AddAuthentication(services);
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PlannerAppControllers", Version = "v1" });
-            });
+            
+            //services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<AppUser>>();
+            //services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+            //services.AddSingleton<IAuthorizationHandler, HasClaimHandler>();
+            services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<AuthenticationStateProvider, MyAuthenticationStateProvider>();
 
             services.AddSingleton<WeatherForecastService>();
-            services.AddScoped<IUserDbContext, UserDbContext>();
-            services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,52 +83,52 @@ namespace PlannerApp
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseSwagger();
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
-
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
-                endpoints.MapControllers();
             });
         }
 
         private void AddAuthentication(IServiceCollection services)
         {
-            services.AddAuthentication(a =>
+            
+
+
+            
+
+            /*
+            services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, HasClaimHandler>();
+            
+            services.AddAuthentication(options =>
             {
-                a.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                a.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(jb =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
             {
-                jb.Events = new JwtBearerEvents
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    OnTokenValidated = context =>
-                    {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        var user = userService.GetById(context.Principal.Identity.Name);
-                        if (user == null)
-                        {
-                            context.Fail("Unauthorized");
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-                jb.RequireHttpsMetadata = false;
-                jb.SaveToken = true;
-                jb.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(_secret),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidIssuer = Configuration["JwtIssuer"],
+                    ValidAudience = Configuration["JwtAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtSecurityKey"]))
                 };
             });
+
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder =
+                new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme);
+                defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
+            */
         }
     }
 }

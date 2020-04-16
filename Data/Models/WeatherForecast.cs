@@ -1,6 +1,6 @@
 using System;
 
-namespace PlannerApp.Data
+namespace PlannerApp.Data.Models
 {
     public class WeatherForecast
     {
